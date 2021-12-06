@@ -6,7 +6,7 @@
 go run cmd/main.go --startUrl https://www.w3.org/Consortium/ --maxDepth 1 --maxErrors 4 --timeOut 15
 ```
 
-В отдельном окне через консоль отправить команду (убрав лишний слещ перед символом доллара)
+В отдельном окне через консоль отправить команду (убрав лишний слэш перед символом доллара)
 
 ```shell
 kill -SIGUSR1 $(pgrep main)

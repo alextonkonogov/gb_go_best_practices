@@ -1,43 +1,46 @@
 package program_test
 
 import (
-	"log"
+	"io/ioutil"
 	"testing"
 
-	"github.com/alextonkonogov/gb_go_best_practices/homework2/config"
-	"github.com/alextonkonogov/gb_go_best_practices/homework2/files"
-	"github.com/alextonkonogov/gb_go_best_practices/homework2/program"
+	"github.com/sirupsen/logrus"
+
+	"github.com/alextonkonogov/gb_go_best_practices/homework2/pkg/config"
+	"github.com/alextonkonogov/gb_go_best_practices/homework2/pkg/files"
+	"github.com/alextonkonogov/gb_go_best_practices/homework2/pkg/program"
 )
 
 func Example() {
+	log := logrus.New()
+	log.SetOutput(ioutil.Discard)
+
 	cnfg, err := config.NewAppConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-	uniqueFiles := files.NewUniqueFilesMap()
+	uniqueFiles := files.NewUniqueFilesMap(log)
 
-	program := program.NewProgram(cnfg, uniqueFiles)
+	program := program.NewProgram(cnfg, uniqueFiles, log)
 	err = program.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Output:
-	//Program starts searching for duplicate files in "."...
-	//Found 2 unique files and 0 duplicates:
-	//program.go
-	//program_test.go
 }
 
 func BenchmarkProgram_Start(b *testing.B) {
+	log := logrus.New()
+
 	for j := 0; j < b.N; j++ {
 		cnfg, err := config.NewAppConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
 		cnfg.PrintResult = false
-		uniqueFiles := files.NewUniqueFilesMap()
+		uniqueFiles := files.NewUniqueFilesMap(log)
 
-		program := program.NewProgram(cnfg, uniqueFiles)
+		program := program.NewProgram(cnfg, uniqueFiles, log)
 		err = program.Start()
 		if err != nil {
 			log.Fatal(err)

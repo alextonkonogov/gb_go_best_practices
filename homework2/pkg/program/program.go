@@ -6,15 +6,17 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
 
-	"github.com/alextonkonogov/gb_go_best_practices/homework2/config"
-	f "github.com/alextonkonogov/gb_go_best_practices/homework2/files"
+	"github.com/TwiN/go-color"
+	"github.com/sirupsen/logrus"
+
+	"github.com/alextonkonogov/gb_go_best_practices/homework2/pkg/config"
+	f "github.com/alextonkonogov/gb_go_best_practices/homework2/pkg/files"
 )
 
 // Struct Program consists of Config, UniqueFiles and amount of found file duplicates
@@ -22,6 +24,7 @@ type Program struct {
 	Config      *config.AppConfig
 	UniqueFiles *f.UniqueFiles
 	Duplicates  int
+	log         *logrus.Logger
 }
 
 // Method Start() is used to start the program finding all the files and their duplicates in a given directory.
@@ -33,7 +36,8 @@ func (p *Program) Start() error {
 	go func(dir string, files chan<- f.File) {
 		filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				log.Println(err)
+				p.log.ReportCaller = true
+				p.log.WithError(err).Fatal(fmt.Sprintf("Error during filepath walk %s", fmt.Sprintf("%s/%s", dir, path)))
 			}
 			if !info.IsDir() && info.Name() != ".DS_Store" {
 				files <- f.NewFile(path, info.Name())
@@ -51,7 +55,7 @@ func (p *Program) Start() error {
 			for file := range files {
 				data, err := ioutil.ReadFile(path.Join(".", file.Path))
 				if err != nil {
-					log.Fatal(err)
+					p.log.WithError(err).Error("failed to read the file", file.Path)
 				}
 				digest := sha512.Sum512(data)
 				uniqueFiles.Mtx.Lock()
@@ -71,6 +75,7 @@ func (p *Program) Start() error {
 
 	err := p.askForConfirmBeforeDeletion()
 	if err != nil {
+		p.log.WithError(err).Error("failed to confirm the deletion of duplicates")
 		return err
 	}
 
@@ -82,19 +87,24 @@ func (p *Program) printResult() {
 	if !p.Config.PrintResult {
 		return
 	}
-	fmt.Printf("Found %d unique files and %d duplicates in \"%s\":\n", len(p.UniqueFiles.Map), p.Duplicates, p.Config.Path)
+	p.log.Info(fmt.Sprintf("Found %d unique files and %d duplicates in \"%s\":\n", len(p.UniqueFiles.Map), p.Duplicates, p.Config.Path))
 
+	counter := 1
 	for k, _ := range p.UniqueFiles.Map {
+		txt := ""
 		for i, _ := range p.UniqueFiles.Map[k] {
 			if i == 0 {
-				fmt.Println(p.UniqueFiles.Map[k][i].Name)
+				txt += fmt.Sprintf("%d) file %s", counter, color.Ize(color.Blue, p.UniqueFiles.Map[k][i].Name))
 				if len(p.UniqueFiles.Map[k]) > 1 {
-					fmt.Printf("    %d duplicates:\n", len(p.UniqueFiles.Map[k])-1)
+					txt += fmt.Sprintf(" with %d duplicates:", len(p.UniqueFiles.Map[k])-1)
 				}
+
 			} else {
-				fmt.Printf("    %s\n", p.UniqueFiles.Map[k][i].Name)
+				txt += fmt.Sprintf(" %s |", color.Ize(color.Blue, p.UniqueFiles.Map[k][i].Name))
 			}
 		}
+		p.log.Info(txt)
+		counter++
 	}
 }
 
@@ -110,18 +120,21 @@ func (p *Program) askForConfirmBeforeDeletion() error {
 			}
 			in := strings.TrimSpace(scanner.Text())
 			if in != "yes" && in != "no" {
-				fmt.Printf("%s", "    try again: type yes or no ")
+				fmt.Printf("%s", "try again: type yes or no\n")
 				continue
 			}
 			if in != "yes" {
+				p.log.Info("User did not confirm deletion")
 				break
 			}
 
+			p.log.Info("User confirmed deletion")
 			err := p.UniqueFiles.DeleteDuplicates()
 			if err != nil {
+				p.log.WithError(err).Error("Failed to delete the duplicates")
 				return err
 			}
-			fmt.Print("All duplicate files were deleted\n")
+			p.log.Info("All duplicate files were deleted")
 			break
 		}
 	}
@@ -130,6 +143,6 @@ func (p *Program) askForConfirmBeforeDeletion() error {
 }
 
 // Use method NewProgram() to get a new program to start
-func NewProgram(cnfg *config.AppConfig, uniqueFiles *f.UniqueFiles) *Program {
-	return &Program{cnfg, uniqueFiles, 0}
+func NewProgram(cnfg *config.AppConfig, uniqueFiles *f.UniqueFiles, log *logrus.Logger) *Program {
+	return &Program{cnfg, uniqueFiles, 0, log}
 }

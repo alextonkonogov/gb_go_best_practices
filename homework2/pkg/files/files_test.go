@@ -3,6 +3,7 @@ package files_test
 import (
 	"crypto/sha512"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -11,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/alextonkonogov/gb_go_best_practices/homework2/files"
+	"github.com/alextonkonogov/gb_go_best_practices/homework2/pkg/files"
 )
 
 //Tests for File
@@ -44,7 +45,8 @@ func ExampleNewFile() {
 
 //Tests for UniqueFiles
 func TestNewUniqueFilesMap(t *testing.T) {
-	uniqueFiles := files.NewUniqueFilesMap()
+	log := logrus.New()
+	uniqueFiles := files.NewUniqueFilesMap(log)
 
 	filepath.Walk("../config", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -68,7 +70,8 @@ func TestNewUniqueFilesMap(t *testing.T) {
 }
 
 func ExampleNewUniqueFilesMap() {
-	uniqueFiles := files.NewUniqueFilesMap()
+	log := logrus.New()
+	uniqueFiles := files.NewUniqueFilesMap(log)
 	fmt.Println(uniqueFiles.Map)
 	// Output:
 	//map[]
@@ -105,7 +108,8 @@ var tests = []struct {
 }
 
 func TestUniqueFiles_Sort(t *testing.T) {
-	uniqueFiles := files.NewUniqueFilesMap()
+	log := logrus.New()
+	uniqueFiles := files.NewUniqueFilesMap(log)
 
 	for i, tt := range tests {
 		digest := sha512.Sum512([]byte(strconv.Itoa(i)))
@@ -116,7 +120,8 @@ func TestUniqueFiles_Sort(t *testing.T) {
 }
 
 func BenchmarkUniqueFiles_Sort(b *testing.B) {
-	uniqueFiles := files.NewUniqueFilesMap()
+	log := logrus.New()
+	uniqueFiles := files.NewUniqueFilesMap(log)
 	for i, tt := range tests {
 		digest := sha512.Sum512([]byte(strconv.Itoa(i)))
 		uniqueFiles.Map[digest] = tt.input

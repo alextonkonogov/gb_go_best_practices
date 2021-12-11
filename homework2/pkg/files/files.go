@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Struct File contains Path and Name of a file.
@@ -26,6 +28,7 @@ func NewFile(path, name string) File {
 type UniqueFiles struct {
 	Mtx *sync.Mutex
 	Map map[[sha512.Size]byte][]File
+	log *logrus.Logger
 }
 
 // Method Sort() sorts file duplicates in slice according to length of names.
@@ -42,6 +45,7 @@ func (uf *UniqueFiles) Sort() {
 // Method DeleteDuplicates() loops over slice of duplicates files and deletes those that considered to be duplicates (all except the first in a slice).
 // Is recommended to use after method Sort().
 func (uf *UniqueFiles) DeleteDuplicates() error {
+	uf.log.Info("Duplicate files deletion started")
 	for k, _ := range uf.Map {
 		if len(uf.Map[k]) == 1 {
 			continue
@@ -50,17 +54,19 @@ func (uf *UniqueFiles) DeleteDuplicates() error {
 			if i == 0 {
 				continue
 			}
-			fmt.Println("...deleting", uf.Map[k][i].Path)
+			uf.log.Info(fmt.Sprintf("...deleting %s", uf.Map[k][i].Path))
 			err := os.Remove(uf.Map[k][i].Path)
 			if err != nil {
+				uf.log.WithError(err).Warn("Failed to delete file", uf.Map[k][i].Path)
 				return err
 			}
 		}
 	}
+	uf.log.Info("Duplicate files deletion ended")
 	return nil
 }
 
 // Use method NewUniqueFilesMap() to create a protected by Mutex map with slices of duplicated files
-func NewUniqueFilesMap() *UniqueFiles {
-	return &UniqueFiles{&sync.Mutex{}, make(map[[sha512.Size]byte][]File)}
+func NewUniqueFilesMap(log *logrus.Logger) *UniqueFiles {
+	return &UniqueFiles{&sync.Mutex{}, make(map[[sha512.Size]byte][]File), log}
 }

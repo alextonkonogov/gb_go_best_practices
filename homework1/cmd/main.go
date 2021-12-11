@@ -177,10 +177,10 @@ func main() {
 	var r Requester
 	r = NewRequester(time.Minute)
 	ctx, cancel := context.WithCancel(context.Background())
-	crawler := NewCrawler(cnfg.MaxDepth, r)
-	crawler.Scan(ctx, cnfg.StartUrl, cnfg.CurDepth)
 	chSig := make(chan os.Signal, 1)
 	signal.Notify(chSig, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGUSR1)
+	crawler := NewCrawler(cnfg.MaxDepth, r)
+	crawler.Scan(ctx, cnfg.StartUrl, cnfg.CurDepth)
 	go processResult(ctx, crawler.GetResultChan(), cnfg, cancel)
 	for {
 		select {

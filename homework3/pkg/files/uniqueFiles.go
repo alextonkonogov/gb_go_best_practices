@@ -24,10 +24,12 @@ type UniqueFiles struct {
 	duplicates int
 }
 
+// Method GetDuplicatesCount() returns the count of duplicates
 func (uf *UniqueFiles) GetDuplicatesCount() int {
 	return uf.duplicates
 }
 
+// Method Find() walks through the path and finds all files and their duplicates
 func (uf *UniqueFiles) Find(searchPath string, workers int) int {
 	files := make(chan File)
 
@@ -71,6 +73,7 @@ func (uf *UniqueFiles) Find(searchPath string, workers int) int {
 	return uf.duplicates
 }
 
+// Method Print() prints list of files and their duplicates
 func (uf *UniqueFiles) Print(searchPath string) {
 	uf.log.Info(fmt.Sprintf("Found %d unique files and %d duplicates in \"%s\":\n", len(uf.Map), uf.duplicates, searchPath))
 	counter := 1

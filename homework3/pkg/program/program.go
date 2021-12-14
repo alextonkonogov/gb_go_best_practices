@@ -46,12 +46,12 @@ type Program struct {
 func (p Program) Start() error {
 	searchPath, workers, printResult, deleteDublicates := p.Config.Get()
 
-	duolicates := p.Finder.Find(searchPath, workers)
+	duplicates := p.Finder.Find(searchPath, workers)
 	if printResult {
 		p.Printer.Print(searchPath)
 	}
 
-	if !deleteDublicates || duolicates == 0 {
+	if !deleteDublicates || duplicates == 0 {
 		return nil
 	}
 	scanner := bufio.NewScanner(os.Stdin)

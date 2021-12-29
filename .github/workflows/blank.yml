@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ homework6 ]
+    branches: [ main ]
   pull_request:
-    branches: [ homework6 ]
+    branches: [ main ]
 
   workflow_dispatch:
 
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.15
 
       - name: Build
         run: cd homework6 || env GOOS=linux GOARCH=386 go build -o file-duplicates-finder homework6/cmd/file-duplicates-finder/main.go

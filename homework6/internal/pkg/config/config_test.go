@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/alextonkonogov/gb_go_best_practices/homework4/internal/pkg/config"
+	"github.com/alextonkonogov/gb_go_best_practices/homework6/internal/pkg/config"
 )
 
 func Example() {

@@ -1,7 +1,6 @@
 repos:
   -   repo: github.com/alextonkonogov/gb_go_best_practices
-      rev: homework6
+      rev: v1.0.2
       hooks:
-        -   id: go-imports
         -   id: golangci-lint
         -   id: go-unit-tests

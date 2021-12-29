@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/alextonkonogov/gb_go_best_practices/homework4/internal/pkg/files"
+	"github.com/alextonkonogov/gb_go_best_practices/homework6/internal/pkg/files"
 )
 
 //Tests for File

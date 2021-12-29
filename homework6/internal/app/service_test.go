@@ -8,9 +8,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/alextonkonogov/gb_go_best_practices/homework4/internal/app"
-	"github.com/alextonkonogov/gb_go_best_practices/homework4/internal/pkg/config"
-	"github.com/alextonkonogov/gb_go_best_practices/homework4/internal/pkg/files"
+	"github.com/alextonkonogov/gb_go_best_practices/homework6/internal/app"
+	"github.com/alextonkonogov/gb_go_best_practices/homework6/internal/pkg/config"
+	"github.com/alextonkonogov/gb_go_best_practices/homework6/internal/pkg/files"
 )
 
 type Stub struct {

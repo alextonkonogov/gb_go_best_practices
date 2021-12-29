@@ -1,4 +1,4 @@
-module github.com/alextonkonogov/gb_go_best_practices/homework4
+module github.com/alextonkonogov/gb_go_best_practices/homework6
 
 go 1.15
 

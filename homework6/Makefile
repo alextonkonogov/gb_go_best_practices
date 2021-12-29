@@ -20,4 +20,3 @@ build-mac: clear lint test
 .PHONY: build-linux
 build-linux: clear lint test
 	env GOOS=linux GOARCH=386 go build -o ${APP} ${PATHTOMAIN}
-
